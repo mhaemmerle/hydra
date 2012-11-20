@@ -36,8 +36,7 @@
               game-map (create-game-map)
               {:keys [chunk-channel num]} @(read-channel ch)]
           (.put state (name :map) state game-map)
-          (let [^:NativeObject result (.call function context scope nil
-                                             (object-array [state 0 0]))
+          (let [result (.call function context scope nil (object-array [state 0 0]))
                 response (.get ^NativeObject result (name :result))]
             (when chunk-channel
               (enqueue-and-close chunk-channel {:result response}))
