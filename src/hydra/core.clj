@@ -19,11 +19,11 @@
     (let [function (.compileFunction context scope script "<compiled>" 1 nil)]
       (loop []
         (let [native-object (NativeObject.)
-              ;; num @(read-channel ch)]
               {:keys [chunk-channel num]} @(read-channel ch)]
           (.put native-object (name :num) native-object num)
           (let [result (.call function context scope nil (object-array [native-object]))]
-            (enqueue-and-close chunk-channel {:result result})
+            (when chunk-channel
+              (enqueue-and-close chunk-channel {:result result}))
             result))
         (recur)))))
 
@@ -38,7 +38,7 @@
   (let [iterations 10000000
         start (. System (nanoTime))]
     (dotimes [i iterations]
-      (enqueue event-channel (rand-int 100)))
+      (enqueue event-channel {:num (rand-int 100)}))
     (let [elapsed-time (/ (double (- (. System (nanoTime)) start)) 1000000.0)
           ips (/ iterations (/ elapsed-time 1000.0))]
       (println (format "Elapsed time: %f msecs, %d ips" elapsed-time (Math/round ips))))))
